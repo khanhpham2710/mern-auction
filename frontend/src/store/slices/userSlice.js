@@ -11,8 +11,13 @@ const userSlice = createSlice({
     leaderboard: [],
   },
   reducers: {
-    registerRequest(state) {
+    requestState(state) {
       state.loading = true;
+      state.isAuthenticated = false;
+      state.user = {};
+    },
+    requestFailed(state){
+      state.loading = false;
       state.isAuthenticated = false;
       state.user = {};
     },
@@ -20,42 +25,21 @@ const userSlice = createSlice({
       state.loading = false;
       state.user = action.payload.user;
     },
-    registerFailed(state) {
+    verifySuccess(state, action) {
       state.loading = false;
-      state.isAuthenticated = false;
-      state.user = {};
-    },
-    loginRequest(state) {
-      state.loading = true;
-      state.isAuthenticated = false;
-      state.user = {};
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
     },
     loginSuccess(state, action) {
       state.loading = false;
       state.isAuthenticated = true;
       state.user = action.payload.user;
     },
-    loginFailed(state) {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.user = {};
-    },
-    fetchUserRequest(state) {
-      state.loading = true;
-      state.isAuthenticated = false;
-      state.user = {};
-    },
     fetchUserSuccess(state, action) {
       state.loading = false;
       state.isAuthenticated = true;
       state.user = action.payload;
     },
-    fetchUserFailed(state) {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.user = {};
-    },
-
     logoutSuccess(state) {
       state.isAuthenticated = false;
       state.user = {};
@@ -82,7 +66,8 @@ const userSlice = createSlice({
 });
 
 export const register = (data) => async (dispatch) => {
-  dispatch(userSlice.actions.registerRequest());
+  dispatch(userSlice.actions.requestState());
+
   try {
     const response = await axiosInstance.post(`/user/register`, data, {
       withCredentials: true,
@@ -93,15 +78,88 @@ export const register = (data) => async (dispatch) => {
     toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
 
+    return response;
   } catch (error) {
-    dispatch(userSlice.actions.registerFailed());
+    dispatch(userSlice.actions.requestFailed());
     toast.error(error.response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   }
 };
 
+export const verify = (data) => async (dispatch) => {
+  dispatch(userSlice.actions.requestState());
+  try {
+    const response = await axiosInstance.post("/user/otp-verification", data, {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+    });
+
+    dispatch(userSlice.actions.verifySuccess(response.data));
+    toast.success(response.data.message);
+    dispatch(userSlice.actions.clearAllErrors());
+  } catch (error) {
+    dispatch(userSlice.actions.requestFailed());
+    toast.error(error.response.data.message);
+    dispatch(userSlice.actions.clearAllErrors());
+  }
+};
+
+export const resendOTP = (data) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post("/user/resend-otp", data, {
+      headers: { "Content-Type": "application/json" },
+    });
+    toast.success(response.data.message);
+  } catch (error) {
+    toast.error(error.response.data.message);
+    dispatch(userSlice.actions.clearAllErrors());
+  }
+};
+
+export const forgotPassword = (email) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post(
+      "/user/forgot",
+      { email },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    toast.success(response.data.message);
+    dispatch(userSlice.actions.clearAllErrors());
+
+  } catch (error) {
+    toast.error(error.response.data.message);
+    dispatch(userSlice.actions.clearAllErrors());
+  }
+};
+
+export const resetPassword = (data) => async (dispatch) => {
+  try {
+    const response = await axiosInstance.post(
+      `/user/password/reset/${data.token}`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    toast.success(response.data.message);
+    dispatch(userSlice.actions.clearAllErrors());
+
+    return response;
+
+  } catch (error) {
+    toast.error(error.response.data.message);
+    dispatch(userSlice.actions.clearAllErrors());
+  }
+}
+
 export const login = (data) => async (dispatch) => {
-  dispatch(userSlice.actions.loginRequest());
+  dispatch(userSlice.actions.requestState());
   try {
     const response = await axiosInstance.post(`/user/login`, data, {
       withCredentials: true,
@@ -110,7 +168,7 @@ export const login = (data) => async (dispatch) => {
     toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(userSlice.actions.loginFailed());
+    dispatch(userSlice.actions.requestFailed());
     toast.error(error.response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   }
@@ -132,7 +190,7 @@ export const logout = () => async (dispatch) => {
 };
 
 export const fetchUser = () => async (dispatch) => {
-  dispatch(userSlice.actions.fetchUserRequest());
+  dispatch(userSlice.actions.requestState());
   try {
     const response = await axiosInstance.get("/user/me", {
       withCredentials: true,
@@ -140,9 +198,8 @@ export const fetchUser = () => async (dispatch) => {
 
     dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
     dispatch(userSlice.actions.clearAllErrors());
-
   } catch (error) {
-    dispatch(userSlice.actions.fetchUserFailed());
+    dispatch(userSlice.actions.requestFailed());
     dispatch(userSlice.actions.clearAllErrors());
     console.error(error);
   }
@@ -159,7 +216,6 @@ export const fetchLeaderboard = () => async (dispatch) => {
       userSlice.actions.fetchLeaderboardSuccess(response.data.leaderboard)
     );
     dispatch(userSlice.actions.clearAllErrors());
-
   } catch (error) {
     dispatch(userSlice.actions.fetchLeaderboardFailed());
     dispatch(userSlice.actions.clearAllErrors());

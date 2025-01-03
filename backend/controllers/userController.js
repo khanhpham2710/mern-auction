@@ -4,12 +4,14 @@ import { User } from "../models/userSchema.js";
 import { generateToken, refreshAccessToken } from "../utils/jwtToken.js";
 import { uploadImage } from "../utils/cloudinary.js";
 import { sendVerifyEmail } from "../utils/sendEmail.js";
+import { sendEmail } from "../utils/sendEmail.js";
+import crypto from "crypto"
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   try {
-    const { name, email, phone, password, verificationMethod } = req.body;
+    const { userName, email, phone, password, verificationMethod } = req.body;
 
-    if (!name || !email || !phone || !password || !verificationMethod) {
+    if (!userName || !email || !phone || !password || !verificationMethod) {
       return next(new ErrorHandler("All fields are required.", 400));
     }
 
@@ -56,23 +58,137 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     }
 
     const userData = {
-      name,
+      userName,
       email,
       phone,
       password,
     };
 
     const user = await User.create(userData);
+
+    const verificationCode = await user.generateVerificationCode();
+
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: `Verification email successfully sent to ${user.name}`,
-    });
 
-    // sendVerifyEmail(user, res);
+    sendVerifyEmail(user, verificationCode, res);
   } catch (error) {
     next(error);
+  }
+});
+
+export const resendOTP = catchAsyncErrors(async (req, res, next) => {
+  const { email, phone } = req.body;
+
+  function validatePhoneNumber(phone) {
+    const phoneRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+    return phoneRegex.test(phone);
+  }
+
+  if (!validatePhoneNumber(phone)) {
+    return next(new ErrorHandler("Invalid phone number.", 400));
+  }
+
+  try {
+    const userAllEntries = await User.find({
+      $or: [
+        {
+          email,
+          accountVerified: false,
+        },
+        {
+          phone,
+          accountVerified: false,
+        },
+      ],
+    }).sort({ createdAt: -1 });
+
+    if (userAllEntries.length === 0) {
+      return next(new ErrorHandler("User not found.", 404));
+    }
+
+    const user = userAllEntries[0]
+    
+    const verificationCode = await user.generateVerificationCode();
+
+    // user.save()
+
+    sendVerifyEmail(user, verificationCode, res);
+
+  } catch (error) {
+    return next(new ErrorHandler("Internal Server Error.", 500));
+  }
+});
+
+export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
+  const { email, otp, phone } = req.body;
+
+  function validatePhoneNumber(phone) {
+    const phoneRegex = /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/;
+    return phoneRegex.test(phone);
+  }
+
+  if (!validatePhoneNumber(phone)) {
+    return next(new ErrorHandler("Invalid phone number.", 400));
+  }
+
+  try {
+    const userAllEntries = await User.find({
+      $or: [
+        {
+          email,
+          accountVerified: false,
+        },
+        {
+          phone,
+          accountVerified: false,
+        },
+      ],
+    }).sort({ createdAt: -1 });
+
+    if (userAllEntries.length === 0) {
+      return next(new ErrorHandler("User not found.", 404));
+    }
+
+    let user;
+
+    if (userAllEntries.length > 1) {
+      user = userAllEntries[0];
+
+      await User.deleteMany({
+        _id: { $ne: user._id },
+        $or: [
+          { phone, accountVerified: false },
+          { email, accountVerified: false },
+        ],
+      });
+    } else {
+      user = userAllEntries[0];
+    }
+
+    if (user.verificationCode !== Number(otp)) {
+      return next(new ErrorHandler("Invalid OTP.", 400));
+    }
+
+    const currentTime = Date.now();
+
+    const verificationCodeExpire = new Date(
+      user.verificationCodeExpire
+    ).getTime();
+
+    if (currentTime > verificationCodeExpire) {
+      return next(new ErrorHandler("OTP Expired.", 400));
+    }
+
+    user.accountVerified = true;
+    user.verificationCode = null;
+    user.verificationCodeExpire = null;
+    await user.save({ validateModifiedOnly: true });
+
+    generateToken(user, res);
+
+  } catch (error) {
+    return next(new ErrorHandler("Internal Server Error.", 500));
   }
 });
 
@@ -241,4 +357,83 @@ export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
     success: true,
     leaderboard,
   });
+});
+
+
+export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findOne({
+    email: req.body.email,
+    accountVerified: true,
+  });
+
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  const resetToken = user.generateResetPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+  
+  const resetPasswordUrl = `${process.env.FRONTEND_URL}/auth/password/reset/${resetToken}`;
+
+  const message = `Your Reset Password Token is:- \n\n ${resetPasswordUrl} \n\n If you have not requested this email then please ignore it.`;
+
+  try {
+    sendEmail({
+      email: user.email,
+      subject: "MERN AUTHENTICATION APP RESET PASSWORD",
+      message,
+    });
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${user.email} successfully.`,
+    });
+  } catch (error) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new ErrorHandler(
+        error.message ? error.message : "Cannot send reset password token.",
+        500
+      )
+    );
+  }
+});
+
+export const resetPassword = catchAsyncErrors(async (req, res, next) => {
+  const { token } = req.params;
+
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(
+      new ErrorHandler(
+        "Reset password token is invalid or has been expired.",
+        400
+      )
+    );
+  }
+
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(
+      new ErrorHandler("Password & confirm password do not match.", 400)
+    );
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  
+  await user.save();
+
+  sendToken(user, 200, "Reset Password Successfully.", res);
 });

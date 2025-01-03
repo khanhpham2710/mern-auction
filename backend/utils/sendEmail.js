@@ -1,5 +1,7 @@
 import nodeMailer from "nodemailer";
 import verifyEmailTemplate from "./emailTemplate/verifyEmail.js"
+import paymentVerifyTemplate from "./emailTemplate/paymentVerify.js"
+import auctionWonTemplate from "./emailTemplate/auctionWon.js"
 
 export const sendEmail = async ({ email, subject, message }) => {
   const transporter = nodeMailer.createTransport({
@@ -21,16 +23,16 @@ export const sendEmail = async ({ email, subject, message }) => {
 };
 
 
-export const sendVerifyEmail = async (user, res) => {
+export const sendVerifyEmail = async (user, verificationCode, res) => {
   await sendEmail({
     email: user.email,
     subject: "Verify Email",
-    message: verifyEmailTemplate(user)
+    message: verifyEmailTemplate(user,verificationCode)
   });
 
   res.status(200).json({
     success: true,
-    message: `Verification email successfully sent to ${user.name}`,
+    message: `Verification email successfully sent to ${user.email}`,
   });
 };
 

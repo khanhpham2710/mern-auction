@@ -7,17 +7,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Button } from "./ui/button";
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
 import { register } from "@/store/slices/userSlice";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { loading } = useSelector((store) => store.user);
 
   const {
@@ -27,15 +29,18 @@ function Register() {
   } = useForm();
 
 
-  const handleRegister = (data) => {
+  const handleRegister = async (data) => {
     const formData = new FormData();
-    formData.append("name", data.userName);
+    formData.append("userName", data.userName);
     formData.append("email", data.email);
     formData.append("password", data.password);
     formData.append("phone", data.phone);
     formData.append('verificationMethod', data.verificationMethod)
 
-    dispatch(register(formData));
+    const response = await dispatch(register(formData));
+    if (response.status == 200){
+      navigate(`/auth/otp-verification/${data.email}/${data.phone}`);
+    }
   };
 
   return (
@@ -137,11 +142,11 @@ function Register() {
               </RadioGroup>
             </div>
 
-            <CardFooter className="flex justify-end">
+            <CardFooter className="flex justify-end p-0">
               <Button
                 type="submit"
                 disabled={loading}
-                className="text-white dark:text-black"
+                className="text-white dark:text-black w-full"
               >
                 {loading ? (
                   <>

@@ -19,3 +19,5 @@ const paymentVerifyTemplate = ({user, updatedUserData, proof}) => {
     <br>
     </div>`;
 };
+
+export default paymentVerifyTemplate;

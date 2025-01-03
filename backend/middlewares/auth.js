@@ -5,15 +5,16 @@ import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 
 export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
   const token =
-    request.cookies.accessToken ||
-    request?.headers?.authorization?.split(" ")[1];
+    req.cookies.accessToken ||
+    req?.headers?.authorization?.split(" ")[1];
 
   if (!token) {
     return next(new ErrorHandler("User not authenticated.", 401));
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET_KEY);
   req.user = await User.findById(decoded.id);
+
   next();
 });
 

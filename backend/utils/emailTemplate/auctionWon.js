@@ -35,3 +35,5 @@ const auctionWonTemplate = ({bidder, auction, auctioneer}) => {
     <br>
     </div>`;
 };
+
+export default auctionWonTemplate;

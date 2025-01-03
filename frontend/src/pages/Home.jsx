@@ -20,10 +20,8 @@ const Home = () => {
 
   const { isAuthenticated } = useSelector((state) => state.user);
 
-  console.log(isAuthenticated)
-
   return (
-      <section className="w-full ml-0 m-0 h-fit px-5 pt-20 flex flex-col min-h-screen py-4 justify-center">
+    <section className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4 justify-center">
         <div>
           <h1
             className={`text-[#111] text-2xl font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-7xl 2xl:text-8xl text-center`}
