@@ -16,7 +16,7 @@ const userSlice = createSlice({
       state.isAuthenticated = false;
       state.user = {};
     },
-    requestFailed(state){
+    requestFailed(state) {
       state.loading = false;
       state.isAuthenticated = false;
       state.user = {};
@@ -75,9 +75,12 @@ export const register = (data) => async (dispatch) => {
     });
 
     dispatch(userSlice.actions.registerSuccess(response.data));
-    if (data.verificationMethod == "phone"){
-      toast.success("Sorry. The phone verification is still being developed. The OTP code will be send to email " + data.email)
-    }else{
+    if (data.verificationMethod == "phone") {
+      toast.success(
+        "Sorry. The phone verification is still being developed. The OTP code will be send to email " +
+          data.email
+      );
+    } else {
       toast.success(response.data.message);
     }
     dispatch(userSlice.actions.clearAllErrors());
@@ -133,7 +136,6 @@ export const forgotPassword = (email) => async (dispatch) => {
     );
     toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
-
   } catch (error) {
     toast.error(error.response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
@@ -155,12 +157,11 @@ export const resetPassword = (data) => async (dispatch) => {
     dispatch(userSlice.actions.clearAllErrors());
 
     return response;
-
   } catch (error) {
     toast.error(error.response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   }
-}
+};
 
 export const login = (data) => async (dispatch) => {
   dispatch(userSlice.actions.requestState());
@@ -200,6 +201,21 @@ export const fetchUser = () => async (dispatch) => {
       withCredentials: true,
     });
 
+    dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
+    dispatch(userSlice.actions.clearAllErrors());
+  } catch (error) {
+    dispatch(userSlice.actions.requestFailed());
+    dispatch(userSlice.actions.clearAllErrors());
+    console.error(error);
+  }
+};
+
+export const updateUserProfile = (data) => async (dispatch) => {
+  dispatch(userSlice.actions.requestState());
+  try {
+    const response = await axiosInstance.put("/user/edit", data,{
+      withCredentials: true,
+    });
     dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
