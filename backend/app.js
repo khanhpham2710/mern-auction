@@ -52,6 +52,13 @@ app.use("/api/v1/auctionitem", auctionItemRouter);
 app.use("/api/v1/bid", bidRouter);
 app.use("/api/v1/commission", commissionRouter);
 app.use("/api/v1/admin", adminRouter);
+app.post("/api/v1/health", async (req,res) => {
+  return res.status(401).json({
+    message: "Health good",
+    error: false,
+    success: true,
+  });
+})
 
 endedAuctionCron();
 verifyCommissionCron();

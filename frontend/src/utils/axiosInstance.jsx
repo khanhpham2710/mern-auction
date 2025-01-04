@@ -3,7 +3,7 @@ import axios from "axios";
 // https://mern-auction-yjtj.onrender.com/auth/login
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api/v1",
+  baseURL: "https://mern-auction-yjtj.onrender.com/auth/login/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,7 +20,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       try {
         await axios.post(
-          "http://localhost:5000/api/v1/user/refresh",
+          "https://mern-auction-yjtj.onrender.com/auth/login/v1/user/refresh",
           {},
           {
             withCredentials: true,
