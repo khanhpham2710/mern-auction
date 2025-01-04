@@ -13,6 +13,7 @@ import adminRouter from "./router/adminRoutes.js";
 import { endedAuctionCron } from "./automation/endedAuctionCron.js";
 import { verifyCommissionCron } from "./automation/verifyCommissionCron.js";
 import { removeUnverifiedAccounts } from "./automation/removeUnverifiedAccounts.js";
+import path from 'path'
 
 const app = express();
 
