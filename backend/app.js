@@ -58,4 +58,11 @@ removeUnverifiedAccounts();
 connection();
 app.use(errorMiddleware);
 
+if (process.env.NODE_ENV === "production") {
+	app.use(express.static(path.join(_dirname,"/frontend/dist")));
+	app.use("*",(_,res) => {
+        res.sendFile(path.resolve(_dirname, "frontend","dist","index.html"));
+    });
+}
+
 export default app;
