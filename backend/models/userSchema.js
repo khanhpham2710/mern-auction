@@ -42,8 +42,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["User", "Admin"],
-      default: "User"
+      enum: ["Auctioneer","Bidder", "Admin"],
+      default: "Bidder"
     },
     unpaidCommission: {
       type: Number,

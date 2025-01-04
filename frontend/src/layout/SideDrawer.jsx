@@ -19,10 +19,10 @@ const SideDrawer = () => {
 
   const { isAuthenticated, user } = useSelector((state) => state.user);
 
-  // const dispatch = useDispatch();
-  // const handleLogout = () => {
-  //   dispatch(logout());
-  // };
+  const dispatch = useDispatch();
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   return (
     <>
@@ -40,7 +40,7 @@ const SideDrawer = () => {
         <div className="relative">
           <Link to={"/"}>
             <h4 className="text-2xl font-semibold mb-4">
-              Transparent<span className="text-[#D6482b]">Auction</span>
+              Prime<span className="text-[#D6482b]">Bid</span>
             </h4>
           </Link>
           <ul className="flex flex-col gap-3">
@@ -60,7 +60,7 @@ const SideDrawer = () => {
                 <MdLeaderboard /> Leaderboard
               </Link>
             </li>
-            {isAuthenticated && user && (
+            {isAuthenticated && user && user.role === "Auctioneer" && (
               <>
                 <li>
                   <Link
@@ -88,7 +88,7 @@ const SideDrawer = () => {
                 </li>
               </>
             )}
-            {isAuthenticated && user && user.role === "Admin" && (
+            {isAuthenticated && user && user.role === "Super Admin" && (
               <li>
                 <Link
                   to={"/dashboard"}
@@ -99,6 +99,38 @@ const SideDrawer = () => {
               </li>
             )}
           </ul>
+          {!isAuthenticated ? (
+            <>
+              <div className="my-4 flex flex-col">
+                <Link
+                  to={"auth/auctioneer/sign-up"}
+                  className="bg-[#D6482B] font-medium hover:bg-[#b8381e] text-md px-1 py-2 rounded-md text-white mt-2 max-w-56"
+                >
+                  Be an auctioneer
+                </Link>
+                <Link
+                  to={"auth/bidder/sign-up"}
+                  className="bg-[#D6482B] font-medium hover:bg-[#b8381e] text-md px-1 py-2 rounded-md text-white mt-2 max-w-56"
+                >
+                  Be a bidder
+                </Link>
+                <Link
+                  to={"/auth/login"}
+                  className="text-[#DECCBE] bg-transparent border-[#DECCBE] border-2 hover:bg-[#fffefd] hover:text-[#fdba88] font-bold text-xl py-1 px-4 rounded-md mt-2 max-w-56"
+                >
+                  Login
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="my-4 flex gap-4 w-fit" onClick={handleLogout}>
+                <button className="bg-[#D6482B] font-semibold hover:bg-[#b8381e] text-xl py-1 px-4 rounded-md text-white">
+                  Logout
+                </button>
+              </div>
+            </>
+          )}
           <hr className="mb-4 border-t-[#d6482b]" />
           <ul className="flex flex-col gap-3">
             {isAuthenticated && (
@@ -155,13 +187,14 @@ const SideDrawer = () => {
           >
             Contact Us
           </Link>
+          <p className="text-stone-500">&copy; PrimeBid, LLC.</p>
           <p className="text-stone-500">
             Degined By{" "}
             <Link
               to={"/"}
               className="font-semibold hover:text-[#d6482b] hover:transition-all hover:duration-150"
             >
-              Duy Khanh
+              CodeWithZeeshu
             </Link>
           </p>
         </div>

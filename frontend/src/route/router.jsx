@@ -1,7 +1,6 @@
 import MainLayout from "@/layout/MainLayout";
 import Home from "@/pages/Home";
 import { createBrowserRouter } from "react-router-dom";
-import RegisterAndSignIn from "@/pages/auth/RegisterAndSignIn";
 import OtpVerification from "@/pages/auth/OtpVerification";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
@@ -12,6 +11,9 @@ import SubmitCommission from "@/pages/SubmitCommision";
 import CreateAuction from "@/pages/CreateAuction";
 import UserProfile from "@/pages/UserProfile";
 import MyAuctions from "@/pages/MyAuctions";
+import BidderRegister from "@/pages/auth/BidderRegister";
+import AuctioneerRegister from "@/pages/auth/AuctioneerRegister";
+import Login from "@/pages/auth/Login";
 
 const router = createBrowserRouter([
   {
@@ -53,8 +55,16 @@ const router = createBrowserRouter([
     element: <Auth />,
     children: [
       {
-        path: "",
-        element: <RegisterAndSignIn />
+        path: "auctioneer/signup",
+        element: <AuctioneerRegister />
+      },
+      {
+        path: "bidder/signup",
+        element: <BidderRegister />
+      },
+      {
+        path: "login",
+        element: <Login />
       },
       {
         path: "otp-verification/:email/:phone",

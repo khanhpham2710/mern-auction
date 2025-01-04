@@ -1,4 +1,3 @@
-import { TabsContent } from "@radix-ui/react-tabs";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Card,
@@ -34,7 +33,6 @@ function Login() {
   };
 
   return (
-    <TabsContent value="login">
       <Card>
         <CardHeader>
           <CardTitle>Login</CardTitle>
@@ -100,7 +98,6 @@ function Login() {
           </div>   
         </CardContent>
       </Card>
-    </TabsContent>
   );
 }
 

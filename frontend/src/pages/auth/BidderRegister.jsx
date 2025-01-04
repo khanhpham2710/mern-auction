@@ -1,4 +1,3 @@
-import { TabsContent } from "@radix-ui/react-tabs";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Card,
@@ -44,11 +43,10 @@ function Register() {
   };
 
   return (
-    <TabsContent value="signup">
       <Card>
         <CardHeader>
-          <CardTitle>Signup</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-center text-2xl uppercase">Signup to be an auctioneer</CardTitle>
+          <CardDescription className="text-center">
             Create a new account and click signup when you&apos;re done.
           </CardDescription>
         </CardHeader>
@@ -161,7 +159,6 @@ function Register() {
           </form>
         </CardContent>
       </Card>
-    </TabsContent>
   );
 }
 

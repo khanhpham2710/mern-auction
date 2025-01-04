@@ -5,14 +5,45 @@ import { generateToken, refreshAccessToken } from "../utils/jwtToken.js";
 import { uploadImage } from "../utils/cloudinary.js";
 import { sendVerifyEmail } from "../utils/sendEmail.js";
 import { sendEmail } from "../utils/sendEmail.js";
-import crypto from "crypto"
+import crypto from "crypto";
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   try {
-    const { userName, email, phone, password, verificationMethod } = req.body;
+    const {
+      userName,
+      email,
+      password,
+      phone,
+      address,
+      role,
+      bankAccountNumber,
+      bankAccountName,
+      bankName,
+      paypalEmail,
+      verificationMethod,
+    } = req.body;
 
-    if (!userName || !email || !phone || !password || !verificationMethod) {
+    if (
+      !userName ||
+      !email ||
+      !phone ||
+      !password ||
+      !address ||
+      !verificationMethod
+    ) {
       return next(new ErrorHandler("All fields are required.", 400));
+    }
+
+
+    if (role === "Auctioneer") {
+      if (!bankAccountName || !bankAccountNumber || !bankName) {
+        return next(
+          new ErrorHandler("Please provide your full bank details.", 400)
+        );
+      }
+      if (!paypalEmail) {
+        return next(new ErrorHandler("Please provide your paypal email.", 400));
+      }
     }
 
     function validatePhoneNumber(phone) {
@@ -62,6 +93,18 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       email,
       phone,
       password,
+      address,
+      role,
+      paymentMethods: {
+        bankTransfer: {
+          bankAccountNumber,
+          bankAccountName,
+          bankName,
+        },
+        paypal: {
+          paypalEmail,
+        },
+      },
     };
 
     const user = await User.create(userData);
@@ -69,7 +112,6 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     const verificationCode = await user.generateVerificationCode();
 
     await user.save();
-
 
     sendVerifyEmail(user, verificationCode, res);
   } catch (error) {
@@ -107,14 +149,13 @@ export const resendOTP = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("User not found.", 404));
     }
 
-    const user = userAllEntries[0]
-    
+    const user = userAllEntries[0];
+
     const verificationCode = await user.generateVerificationCode();
 
     // user.save()
 
     sendVerifyEmail(user, verificationCode, res);
-
   } catch (error) {
     return next(new ErrorHandler("Internal Server Error.", 500));
   }
@@ -186,7 +227,6 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
     await user.save({ validateModifiedOnly: true });
 
     generateToken(user, res);
-
   } catch (error) {
     return next(new ErrorHandler("Internal Server Error.", 500));
   }
@@ -302,7 +342,11 @@ export const getProfile = catchAsyncErrors(async (req, res, next) => {
 export const logout = catchAsyncErrors(async (req, res, next) => {
   res
     .status(200)
-    .cookie("token", "", {
+    .cookie("accessToken", "", {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .cookie("refreshToken", "", {
       expires: new Date(Date.now()),
       httpOnly: true,
     })
@@ -359,7 +403,6 @@ export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
 export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
   const user = await User.findOne({
     email: req.body.email,
@@ -373,7 +416,7 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
   const resetToken = user.generateResetPasswordToken();
 
   await user.save({ validateBeforeSave: false });
-  
+
   const resetPasswordUrl = `${process.env.FRONTEND_URL}/auth/password/reset/${resetToken}`;
 
   const message = `Your Reset Password Token is:- \n\n ${resetPasswordUrl} \n\n If you have not requested this email then please ignore it.`;
@@ -432,7 +475,7 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
   user.password = req.body.password;
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
-  
+
   await user.save();
 
   sendToken(user, 200, "Reset Password Successfully.", res);
