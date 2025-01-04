@@ -14,6 +14,10 @@ import MyAuctions from "@/pages/MyAuctions";
 import BidderRegister from "@/pages/auth/BidderRegister";
 import AuctioneerRegister from "@/pages/auth/AuctioneerRegister";
 import Login from "@/pages/auth/Login";
+import HowItWorks from "@/pages/HowItWorks";
+import AboutUs from "@/pages/AboutUs";
+import Contact from "@/pages/Contact";
+import Dashboard from "@/pages/Dashboard";
 
 const router = createBrowserRouter([
   {
@@ -47,6 +51,22 @@ const router = createBrowserRouter([
       {
         path: "/view-my-auctions",
         element: <MyAuctions />
+      },
+      {
+        path: "/how-it-works-info",
+        element: <HowItWorks />
+      },
+      {
+        path: "/about",
+        element: <AboutUs />
+      },
+      {
+        path:"/contact",
+        element: <Contact />
+      },
+      {
+        path: "/dashboard",
+        element: <Dashboard />
       }
     ],
   },
@@ -55,11 +75,11 @@ const router = createBrowserRouter([
     element: <Auth />,
     children: [
       {
-        path: "auctioneer/signup",
+        path: "auctioneer/sign-up",
         element: <AuctioneerRegister />
       },
       {
-        path: "bidder/signup",
+        path: "bidder/sign-up",
         element: <BidderRegister />
       },
       {

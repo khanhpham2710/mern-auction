@@ -74,7 +74,7 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-            <div className="mb-6 w-full">
+            {user.role === "Auctioneer" && <div className="mb-6 w-full">
               <h3 className="text-xl font-semibold mb-4">Payment Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -110,7 +110,7 @@ const Profile = () => {
                   </h1>
                 </div>
               </div>
-            </div>
+            </div>}
           </div>
         </>
       )}

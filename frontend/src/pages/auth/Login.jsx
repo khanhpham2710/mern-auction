@@ -33,7 +33,7 @@ function Login() {
   };
 
   return (
-      <Card>
+      <Card className="min-w-[400px]">
         <CardHeader>
           <CardTitle>Login</CardTitle>
           <CardDescription>Login with your email and password.</CardDescription>

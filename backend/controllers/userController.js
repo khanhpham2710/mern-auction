@@ -6,6 +6,7 @@ import { uploadImage } from "../utils/cloudinary.js";
 import { sendVerifyEmail } from "../utils/sendEmail.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   try {
@@ -28,7 +29,6 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       !email ||
       !phone ||
       !password ||
-      !address ||
       !verificationMethod
     ) {
       return next(new ErrorHandler("All fields are required.", 400));
@@ -36,6 +36,9 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 
 
     if (role === "Auctioneer") {
+      if (!address){
+        return next(new ErrorHandler("All fields are required.", 400));
+      }
       if (!bankAccountName || !bankAccountNumber || !bankName) {
         return next(
           new ErrorHandler("Please provide your full bank details.", 400)
@@ -385,7 +388,7 @@ export const refresh = catchAsyncErrors(async (req, res, next) => {
     const user = await User.findById(verifyToken?._id);
     refreshAccessToken(user, res);
   } catch (error) {
-    return response.status(500).json({
+    return res.status(500).json({
       message: error.message || error,
       error: true,
       success: false,

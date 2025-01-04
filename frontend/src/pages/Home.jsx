@@ -1,8 +1,8 @@
+import FeaturedAuctions from "@/components/FeatureAuctions";
+import Leaderboard from "@/components/Leaderboard";
+import UpcomingAuctions from "@/components/UpcomingAuctions";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-// import FeaturedAuctions from "./home-sub-components/FeaturedAuctions";
-// import UpcomingAuctions from "./home-sub-components/UpcomingAuctions";
-// import Leaderboard from "./home-sub-components/Leaderboard";
 
 const Home = () => {
   const howItWorks = [
@@ -32,13 +32,13 @@ const Home = () => {
           {!isAuthenticated && (
             <>
               <Link
-                to="/auth/auctioneer/signup"
+                to="/auth/auctioneer/sign-up"
                 className="bg-primary font-semibold hover:bg-primary-800 rounded-md px-8 flex items-center py-2 text-white transition-all duration-300"
               >
                 Become an auctioneer
               </Link>
               <Link
-                to={"/auth/bidder/signup"}
+                to={"/auth/bidder/sign-up"}
                 className="bg-primary font-semibold hover:bg-primary-800 rounded-md px-8 flex items-center py-2 text-white transition-all duration-300"
               >
                 Become an bidder
@@ -71,9 +71,9 @@ const Home = () => {
           })}
         </div>
       </div>
-      {/* <FeaturedAuctions />
+      <FeaturedAuctions />
         <UpcomingAuctions />
-        <Leaderboard /> */}
+        <Leaderboard />
     </section>
   );
 };

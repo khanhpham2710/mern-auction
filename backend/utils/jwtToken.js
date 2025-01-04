@@ -30,7 +30,7 @@ export const refreshAccessToken = (user, res) => {
     .status(200)
     .cookie("accessToken", accessToken, {
       expires: new Date(
-        Date.now() + process.env.ACCESS_EXPIRE * 24 * 60 * 60 * 1000
+        Date.now() + process.env.ACCESS_JWT_EXPIRE * 24 * 60 * 60 * 1000
       ),
       httpOnly: true,
     })

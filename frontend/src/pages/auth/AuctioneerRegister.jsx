@@ -16,14 +16,6 @@ import { Loader2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 import { useState } from "react";
 
 function AuctioneerRegister() {
@@ -209,25 +201,20 @@ function AuctioneerRegister() {
                 <Label className="text-[16px] text-stone-500">
                   Bank Details
                 </Label>
-                <Select
+                <select
+                  id="bankName"
                   value={bankName}
-                  onValueChange={(value) => {
-                    setBankName(value);
+                  onChange={(e) => {
+                    setBankName(e.target.value);
                     setError(false);
                   }}
                   className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-stone-500 focus:outline-none w-full"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Your Bank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="TechcomBank">TechcomBank</SelectItem>
-                      <SelectItem value="VietcomBank">VietcomBank</SelectItem>
-                      <SelectItem value="MBBank">MBBank</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                  <option value="">Select Your Bank</option>
+                  <option value="TechcomBank">TechcomBank</option>
+                  <option value="VietcomBank">VietcomBank</option>
+                  <option value="MBBank">MBBank</option>
+                </select>
                 {error && (
                   <span className="text-red-500 text-sm">
                     Bank Name is required

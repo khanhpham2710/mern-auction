@@ -45,7 +45,7 @@ function Register() {
   return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-center text-2xl uppercase">Signup to be an auctioneer</CardTitle>
+          <CardTitle className="text-center text-2xl uppercase">Signup to be an bidder</CardTitle>
           <CardDescription className="text-center">
             Create a new account and click signup when you&apos;re done.
           </CardDescription>

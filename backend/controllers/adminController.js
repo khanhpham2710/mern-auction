@@ -51,16 +51,15 @@ export const updateProofStatus = catchAsyncErrors(async (req, res, next) => {
   if (!proof) {
     return next(new ErrorHandler("Payment proof not found.", 404));
   }
-
   proof = await PaymentProof.findByIdAndUpdate(
     id,
     { status, amount },
     {
       new: true,
       runValidators: true,
+      useFindAndModify: false,
     }
   );
-  
   res.status(200).json({
     success: true,
     message: "Payment proof amount and status updated.",
@@ -84,15 +83,11 @@ export const deletePaymentProof = catchAsyncErrors(async (req, res, next) => {
 export const fetchAllUsers = catchAsyncErrors(async (req, res, next) => {
   const users = await User.aggregate([
     {
-      $match: {
-        role: "User",
-      },
-    },
-    {
       $group: {
         _id: {
           month: { $month: "$createdAt" },
-          year: { $year: "$createdAt" },
+          year: { $month: "$createdAt" },
+          role: "$role",
         },
         count: { $sum: 1 },
       },
@@ -101,6 +96,7 @@ export const fetchAllUsers = catchAsyncErrors(async (req, res, next) => {
       $project: {
         month: "$_id.month",
         year: "$_id.year",
+        role: "$_id.role",
         count: 1,
         _id: 0,
       },
@@ -109,6 +105,9 @@ export const fetchAllUsers = catchAsyncErrors(async (req, res, next) => {
       $sort: { year: 1, month: 1 },
     },
   ]);
+
+  const bidders = users.filter((user) => user.role === "Bidder");
+  const auctioneers = users.filter((user) => user.role === "Auctioneer");
 
   const tranformDataToMonthlyArray = (data, totalMonths = 12) => {
     const result = Array(totalMonths).fill(0);
@@ -120,14 +119,15 @@ export const fetchAllUsers = catchAsyncErrors(async (req, res, next) => {
     return result;
   };
 
-  const usersArray = tranformDataToMonthlyArray(users);
+  const biddersArray = tranformDataToMonthlyArray(bidders);
+  const auctioneersArray = tranformDataToMonthlyArray(auctioneers);
 
   res.status(200).json({
     success: true,
-    usersArray,
+    biddersArray,
+    auctioneersArray,
   });
 });
-
 
 export const monthlyRevenue = catchAsyncErrors(async (req, res, next) => {
   const payments = await Commission.aggregate([

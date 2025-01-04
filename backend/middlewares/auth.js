@@ -12,6 +12,7 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("User not authenticated.", 401));
   }
 
+
   const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET_KEY);
   req.user = await User.findById(decoded.id);
 
