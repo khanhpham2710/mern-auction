@@ -14,7 +14,7 @@ import { useDispatch } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-// import { updateUserProfile } from "@/store/slices/userSlice";
+import { updateUserProfile } from "@/store/slices/userSlice";
 
 function EditProfile({ user }) {
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,7 @@ function EditProfile({ user }) {
     formData.append("address", data.address);
     formData.append("profilePhoto", data.profilePhoto);
 
-    // dispatch(updateUserProfile(formData));
+    dispatch(updateUserProfile(formData));
 
     setLoading(false);
   };

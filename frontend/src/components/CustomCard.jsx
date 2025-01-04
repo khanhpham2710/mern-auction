@@ -35,6 +35,7 @@ const CustomCard = ({ imgSrc, title, startingBid, startTime, endTime, id }) => {
       setTimeLeft(calculateTimeLeft());
     });
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft]);
 
   const formatTimeLeft = ({ days, hours, minutes, seconds }) => {

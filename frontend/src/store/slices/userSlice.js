@@ -75,7 +75,11 @@ export const register = (data) => async (dispatch) => {
     });
 
     dispatch(userSlice.actions.registerSuccess(response.data));
-    toast.success(response.data.message);
+    if (data.verificationMethod == "phone"){
+      toast.success("Sorry. The phone verification is still being developed. The OTP code will be send to email " + data.email)
+    }else{
+      toast.success(response.data.message);
+    }
     dispatch(userSlice.actions.clearAllErrors());
 
     return response;

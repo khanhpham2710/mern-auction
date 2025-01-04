@@ -34,7 +34,7 @@ function Register() {
     formData.append("email", data.email);
     formData.append("password", data.password);
     formData.append("phone", data.phone);
-    formData.append('verificationMethod', data.verificationMethod)
+    formData.append('verificationMethod', "email")
 
     const response = await dispatch(register(formData));
     if (response.status == 200){
