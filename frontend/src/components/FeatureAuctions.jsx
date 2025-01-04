@@ -11,7 +11,7 @@ const FeaturedAuctions = () => {
           Featured Auctions
         </h3>
         <div className="flex flex-wrap gap-6">
-          {allAuctions.slice(0, 8).map((element) => {
+          {allAuctions?.slice(0, 8).map((element) => {
             return (
               <AuctionCard
                 title={element.title}

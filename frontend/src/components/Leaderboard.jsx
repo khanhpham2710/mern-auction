@@ -25,7 +25,7 @@ const Leaderboard = () => {
               </tr>
             </thead>
             <tbody className="text-gray-700">
-              {leaderboard.slice(0, 10).map((element, index) => {
+              {leaderboard?.slice(0, 10).map((element, index) => {
                 return (
                   <tr key={element._id} className="border-b border-gray-300">
                     <td className="flex gap-2 items-center py-2 px-4">
