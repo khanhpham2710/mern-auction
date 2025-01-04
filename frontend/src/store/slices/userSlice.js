@@ -174,6 +174,7 @@ export const login = (data) => async (dispatch) => {
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(userSlice.actions.requestFailed());
+    console.log(error)
     toast.error(error.response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   }

@@ -319,7 +319,7 @@ export const login = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Please fill full form."));
   }
 
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email }).select({ password: 1 });
 
   if (!user) {
     return next(new ErrorHandler("Invalid credentials.", 400));
@@ -385,7 +385,7 @@ export const refresh = catchAsyncErrors(async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(verifyToken?._id);
+    const user = await User.findById(verifyToken?.id);
     refreshAccessToken(user, res);
   } catch (error) {
     return res.status(500).json({

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { access } from "fs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -109,7 +110,7 @@ userSchema.methods.generateJsonWebToken = function () {
     { id: this._id },
     process.env.REFRESH_JWT_SECRET_KEY,
     {
-      expiresIn: process.env.REFRESH_JWT_EXPIRE,
+      expiresIn: process.env.REFRESH_JWT_EXPIRE * 60 * 60 * 1000,
     }
   );
 
@@ -117,13 +118,16 @@ userSchema.methods.generateJsonWebToken = function () {
 };
 
 userSchema.methods.refreshToken = function () {
-  return (accessToken = jwt.sign(
+
+  const accessToken = jwt.sign(
     { id: this._id },
     process.env.ACCESS_JWT_SECRET_KEY,
     {
-      expiresIn: process.env.ACCESS_JWT_EXPIRE,
+      expiresIn: process.env.ACCESS_JWT_EXPIRE * 60 * 60 * 1000,
     }
-  ));
+  );
+
+  return accessToken
 };
 
 userSchema.methods.generateResetPasswordToken = function () {
