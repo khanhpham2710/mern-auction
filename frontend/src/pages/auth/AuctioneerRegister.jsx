@@ -16,7 +16,7 @@ import { Loader2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 function AuctioneerRegister() {
   const dispatch = useDispatch();
@@ -24,16 +24,24 @@ function AuctioneerRegister() {
   const { loading } = useSelector((store) => store.user);
   const [bankName, setBankName] = useState();
   const [error, setError] = useState(false);
+  const [form, setForm] = useState(null);
 
   const {
-    register: registerForm,
-    handleSubmit,
-    formState: { errors },
+    register: registerFormStep1,
+    handleSubmit: handleSubmitStep1,
+    formState: { errors: errorsStep1 },
+  } = useForm();
+
+  const {
+    register: registerFormStep2,
+    handleSubmit: handleSubmitStep2,
+    formState: { errors: errorsStep2 },
   } = useForm();
 
   const [activeTab, setActiveTab] = useState("Step1");
+  const nextRef = useRef()
 
-  const handleRegister = async (data) => {
+  const handleRegisterStep1 = async (data) => {
     const formData = {
       userName: data.userName,
       email: data.email,
@@ -41,82 +49,98 @@ function AuctioneerRegister() {
       phone: data.phone,
       address: data.address,
       verificationMethod: data.verificationMethod,
+    };
+
+    setForm(formData);
+
+    setActiveTab("Step2");
+  };
+
+  const handleRegisterStep2 = async (data) => {
+    const formData = {
       role: "Auctioneer",
-      bankName: bankName,
+      bankName,
       bankAccountNumber: data.bankAccountNumber,
       bankAccountName: data.bankAccountName,
       paypalEmail: data.paypalEmail,
     };
 
-    const response = await dispatch(register(formData));
+    setForm((prev) => ({
+      ...prev,
+      formData,
+    }));
+
+    const response = await dispatch(register(form));
     if (response.status === 200) {
       navigate(`/auth/otp-verification/${data.email}/${data.phone}`);
     }
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
+    <Tabs value={activeTab} className="w-[400px]">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="Step1">Step 1</TabsTrigger>
-        <TabsTrigger value="Step2">Step 2</TabsTrigger>
+        <TabsTrigger value="Step1" onClick={()=>setActiveTab("Step1")}>Step 1</TabsTrigger>
+        <TabsTrigger
+          value="Step2"
+          onClick={() => nextRef.current.click()}
+        > Step 2
+        </TabsTrigger>
       </TabsList>
 
+      {/* Step 1 Form */}
       <TabsContent value="Step1">
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-2xl uppercase">
+            <CardTitle className="text-center text-xl uppercase">
               Signup to be an auctioneer
             </CardTitle>
             <CardDescription className="text-center">
               Create a new account and click signup when you&apos;re done.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1">
             <form
-              onSubmit={() => {
-                handleSubmit(handleRegister);
-                if (!bankName) {
-                  setError(true);
-                }
-              }}
-              className="space-y-2"
+              onSubmit={handleSubmitStep1(handleRegisterStep1)}
+              className="space-y-1"
             >
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label htmlFor="userName">Username</Label>
                 <Input
                   type="text"
                   id="userName"
-                  {...registerForm("userName", {
+                  {...registerFormStep1("userName", {
                     required: "Username is required",
                   })}
                   placeholder="Eg. khanh"
                 />
-                {errors.userName && (
+                {errorsStep1.userName && (
                   <span className="text-red-500 text-sm">
-                    {errors.userName.message}
+                    {errorsStep1.userName.message}
                   </span>
                 )}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   type="email"
                   id="email"
-                  {...registerForm("email", { required: "Email is required" })}
+                  {...registerFormStep1("email", {
+                    required: "Email is required",
+                  })}
                   placeholder="Eg. example@gmail.com"
                 />
-                {errors.email && (
+                {errorsStep1.email && (
                   <span className="text-red-500 text-sm">
-                    {errors.email.message}
+                    {errorsStep1.email.message}
                   </span>
                 )}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label htmlFor="phone">Phone number</Label>
                 <Input
                   type="text"
                   id="phone"
-                  {...registerForm("phone", {
+                  {...registerFormStep1("phone", {
                     required: "Phone number is required",
                     pattern: {
                       value: /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
@@ -124,33 +148,33 @@ function AuctioneerRegister() {
                     },
                   })}
                 />
-                {errors.phone && (
+                {errorsStep1.phone && (
                   <span className="text-red-500 text-sm">
-                    {errors.phone.message}
+                    {errorsStep1.phone.message}
                   </span>
                 )}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label htmlFor="address">Address</Label>
                 <Input
                   type="text"
                   id="address"
-                  {...registerForm("address", {
+                  {...registerFormStep1("address", {
                     required: "Address is required",
                   })}
                 />
-                {errors.address && (
+                {errorsStep1.address && (
                   <span className="text-red-500 text-sm">
-                    {errors.address.message}
+                    {errorsStep1.address.message}
                   </span>
                 )}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   type="password"
                   id="password"
-                  {...registerForm("password", {
+                  {...registerFormStep1("password", {
                     required: "Password is required",
                     minLength: {
                       value: 8,
@@ -159,17 +183,17 @@ function AuctioneerRegister() {
                   })}
                   placeholder="Eg. password"
                 />
-                {errors.password && (
+                {errorsStep1.password && (
                   <span className="text-red-500 text-sm">
-                    {errors.password.message}
+                    {errorsStep1.password.message}
                   </span>
                 )}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <Label>Select Verification Method</Label>
                 <RadioGroup
                   defaultValue="email"
-                  {...registerForm("verificationMethod")}
+                  {...registerFormStep1("verificationMethod")}
                   className="flex py-2 justify-around"
                 >
                   <div className="flex items-center space-x-2">
@@ -182,6 +206,16 @@ function AuctioneerRegister() {
                   </div>
                 </RadioGroup>
               </div>
+
+              <CardFooter className="flex justify-end p-0">
+                <Button
+                  type="submit"
+                  className="text-white dark:text-black w-full"
+                  ref={nextRef}
+                >
+                  Next
+                </Button>
+              </CardFooter>
             </form>
           </CardContent>
         </Card>
@@ -196,7 +230,10 @@ function AuctioneerRegister() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(handleRegister)} className="space-y-2">
+            <form
+              onSubmit={handleSubmitStep2(handleRegisterStep2)}
+              className="space-y-2"
+            >
               <div>
                 <Label className="text-[16px] text-stone-500">
                   Bank Details
@@ -229,7 +266,7 @@ function AuctioneerRegister() {
                 <div className="flex flex-col sm:flex-row sm:gap-4 w-full my-2">
                   <Input
                     type="text"
-                    {...registerForm("bankAccountNumber", {
+                    {...registerFormStep2("bankAccountNumber", {
                       required: "Bank account number is required",
                     })}
                     placeholder="Bank Account Number"
@@ -237,21 +274,21 @@ function AuctioneerRegister() {
                   />
                   <Input
                     type="text"
-                    {...registerForm("bankAccountName", {
+                    {...registerFormStep2("bankAccountName", {
                       required: "Bank account username is required",
                     })}
                     placeholder="Bank Account UserName"
                     className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-stone-500 focus:outline-none sm:flex-1 my-1"
                   />
                 </div>
-                {errors.bankAccountNumber && (
+                {errorsStep2.bankAccountNumber && (
                   <span className="text-red-500 text-sm">
-                    {errors.bankAccountNumber.message}
+                    {errorsStep2.bankAccountNumber.message}
                   </span>
                 )}
-                {errors.bankAccountName && (
+                {errorsStep2.bankAccountName && (
                   <span className="text-red-500 text-sm">
-                    {errors.bankAccountName.message}
+                    {errorsStep2.bankAccountName.message}
                   </span>
                 )}
               </div>
@@ -263,16 +300,16 @@ function AuctioneerRegister() {
                 <div className="flex flex-col sm:flex-row sm:gap-4">
                   <Input
                     type="email"
-                    {...registerForm("paypalEmail", {
+                    {...registerFormStep2("paypalEmail", {
                       required: "Paypal email is required",
                     })}
                     placeholder="Paypal Email"
                     className="text-[16px] py-2 bg-transparent border-b-[1px] border-b-stone-500 focus:outline-none sm:flex-1"
                   />
                 </div>
-                {errors.paypalEmail && (
+                {errorsStep2.paypalEmail && (
                   <span className="text-red-500 text-sm">
-                    {errors.paypalEmail.message}
+                    {errorsStep2.paypalEmail.message}
                   </span>
                 )}
               </div>
