@@ -2,11 +2,12 @@ import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userSchema.js";
 import { generateToken, refreshAccessToken } from "../utils/jwtToken.js";
-import { uploadImage } from "../utils/cloudinary.js";
+import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 import { sendVerifyEmail } from "../utils/sendEmail.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import resetPasswordTemplate from "../utils/emailTemplate/resetPassword.js";
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   try {
@@ -24,19 +25,12 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       verificationMethod,
     } = req.body;
 
-    if (
-      !userName ||
-      !email ||
-      !phone ||
-      !password ||
-      !verificationMethod
-    ) {
+    if (!userName || !email || !phone || !password || !verificationMethod) {
       return next(new ErrorHandler("All fields are required.", 400));
     }
 
-
     if (role === "Auctioneer") {
-      if (!address){
+      if (!address) {
         return next(new ErrorHandler("All fields are required.", 400));
       }
       if (!bankAccountName || !bankAccountNumber || !bankName) {
@@ -236,10 +230,28 @@ export const verifyOTP = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const editProfile = catchAsyncErrors(async (req, res, next) => {
-  const { profileImage } = req.files;
+  const {
+    userName,
+    address,
+    role,
+    email,
+    newImage,
+    bankAccountNumber,
+    bankAccountName,
+    bankName,
+    paypalEmail,
+  } = req.body;
+
   let cloudinaryResponse;
 
-  if (profileImage) {
+  const isRegistered = await User.findOne({ email });
+
+  if (!isRegistered) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  if (!newImage) {
+    const { profileImage } = req.files;
     const allowedFormats = ["image/png", "image/jpeg", "image/webp"];
     if (!allowedFormats.includes(profileImage.mimetype)) {
       return next(new ErrorHandler("File format not supported.", 400));
@@ -248,63 +260,44 @@ export const editProfile = catchAsyncErrors(async (req, res, next) => {
       profileImage,
       "Failed to upload profile image"
     );
+    if (isRegistered.profileImage.public_id) {
+      deleteImage(isRegistered.profileImage.public_id, "Upload image error");
+    }
   }
 
-  const {
-    userName,
-    address,
-    role,
-    bankAccountNumber,
-    bankAccountName,
-    bankName,
-    paypalEmail,
-  } = req.body;
+  // if (!bankAccountName || !bankAccountNumber || !bankName) {
+  //   return next(
+  //     new ErrorHandler("Please provide your full bank details.", 400)
+  //   );
+  // }
 
-  if (!bankAccountName || !bankAccountNumber || !bankName) {
-    return next(
-      new ErrorHandler("Please provide your full bank details.", 400)
-    );
-  }
-
-  if (!paypalEmail) {
-    return next(new ErrorHandler("Please provide your paypal email.", 400));
-  }
-
-  const isRegistered = await User.findOne({ email });
-
-  if (isRegistered && isRegistered._id.toString() !== req.user._id.toString()) {
-    return next(
-      new ErrorHandler("Email is already registered by another user.", 400)
-    );
-  }
+  // if (!paypalEmail) {
+  //   return next(new ErrorHandler("Please provide your paypal email.", 400));
+  // }
 
   const updatedData = {
     userName,
     address,
     role,
     profileImage: {
-      public_id: cloudinaryResponse.public_id,
-      url: cloudinaryResponse.secure_url,
+      public_id: cloudinaryResponse?.public_id,
+      url: cloudinaryResponse?.secure_url,
     },
-    paymentMethods: {
-      bankTransfer: {
-        bankAccountNumber,
-        bankAccountName,
-        bankName,
-      },
-      paypal: {
-        paypalEmail,
-      },
-    },
+    // paymentMethods: {
+    //   bankTransfer: {
+    //     bankAccountNumber,
+    //     bankAccountName,
+    //     bankName,
+    //   },
+    //   paypal: {
+    //     paypalEmail,
+    //   },
+    // },
   };
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, updatedData, {
     new: true,
   }).select("-password");
-
-  if (!updatedUser) {
-    return next(new ErrorHandler("User not found.", 404));
-  }
 
   res.status(200).json({
     success: true,
@@ -420,15 +413,13 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetPasswordUrl = `${process.env.FRONTEND_URL}/auth/password/reset/${resetToken}`;
-
-  const message = `Your Reset Password Token is:- \n\n ${resetPasswordUrl} \n\n If you have not requested this email then please ignore it.`;
+  const message = resetPasswordTemplate(user,resetToken)
 
   try {
     sendEmail({
       email: user.email,
       subject: "MERN AUTHENTICATION APP RESET PASSWORD",
-      message,
+      message
     });
     res.status(200).json({
       success: true,
@@ -455,12 +446,10 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
     .update(token)
     .digest("hex");
 
-
   const user = await User.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
-
 
   if (!user) {
     return next(
@@ -486,6 +475,6 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
   return res.status(200).json({
     message: "Reset password successfully",
     success: true,
-    error: false
-  })
+    error: false,
+  });
 });

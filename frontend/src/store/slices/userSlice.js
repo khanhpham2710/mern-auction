@@ -36,6 +36,7 @@ const userSlice = createSlice({
       state.user = action.payload.user;
     },
     fetchUserSuccess(state, action) {
+      console.log(state)
       state.loading = false;
       state.isAuthenticated = true;
       state.user = action.payload;
@@ -58,6 +59,9 @@ const userSlice = createSlice({
     fetchLeaderboardFailed(state) {
       state.loading = false;
       state.leaderboard = [];
+    },
+    setLoadingTrue(state) {
+      state.loading = true
     },
     clearAllErrors(state) {
       state.loading = false;
@@ -155,7 +159,6 @@ export const resetPassword = (data) => async (dispatch) => {
     );
     toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
-
     return response;
   } catch (error) {
     toast.error(error.response.data.message);
@@ -173,8 +176,7 @@ export const login = (data) => async (dispatch) => {
     toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(userSlice.actions.requestFailed());
-    console.log(error)
+
     toast.error(error.response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   }
@@ -212,12 +214,15 @@ export const fetchUser = () => async (dispatch) => {
 };
 
 export const updateUserProfile = (data) => async (dispatch) => {
-  dispatch(userSlice.actions.requestState());
+  dispatch(userSlice.actions.setLoadingTrue());
   try {
-    const response = await axiosInstance.put("/user/edit", data,{
+    const response = await axiosInstance.put("/user/edit", data, {
       withCredentials: true,
+      headers: { "Content-Type": "multipart/form-data" },
     });
+
     dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
+    toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(userSlice.actions.requestFailed());

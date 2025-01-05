@@ -17,13 +17,13 @@ const Profile = () => {
         <Loader2 />
       ) : (
         <>
-          <div className="max-w-4xl mx-auto px-4 my-10">
+          <div className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col min-h-screen py-4">
             <h1 className="font-bold text-2xl text-center md:text-left">
               PROFILE
             </h1>
             <div className="flex flex-col md:flex-row items-center md:items-start gap-8 my-5">
               <div className="flex flex-col items-center">
-                <Avatar className="h-24 w-24 md:h-32 md:w-32 mb-4">
+                <Avatar className="h-24 w-24 md:h-32 md:w-32 mb-4 z-[-1]">
                   <AvatarImage
                     src={user.profileImage?.url || "/imageHolder.jpg"}
                   />

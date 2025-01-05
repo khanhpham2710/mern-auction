@@ -22,4 +22,14 @@ export const uploadImage = async (image, errorMessage) => {
     );
     return next(new ErrorHandler(errorMessage, 500));
   }
-}
+
+  return cloudinaryResponse
+};
+
+export const deleteImage = async (imageId, errorMessage) => {
+  try {
+    await cloudinary.uploader.destroy(imageId);
+  } catch (error) {
+    return next(new ErrorHandler(errorMessage, 500));
+  }
+};

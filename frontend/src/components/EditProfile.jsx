@@ -14,18 +14,20 @@ import { useDispatch } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { updateUserProfile } from "@/store/slices/userSlice";
+import { fetchUser, updateUserProfile } from "@/store/slices/userSlice";
 
 function EditProfile({ user }) {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const inputRef = useRef();
+  const [profileImage, setProfileImage] = useState(user.profileImage?.url);
+  const [profileImagePreview, setProfileImagePreview] = useState(profileImage);
+  const [newImage, setNewImage] = useState(false);
+  const imageRef = useRef();
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     defaultValues: {
       name: user.userName,
@@ -36,26 +38,29 @@ function EditProfile({ user }) {
     },
   });
 
-  const [filePreview, setFilePreview] = useState(user.profileImage?.url);
-
-  const onChangeHandler = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFilePreview(URL.createObjectURL(file));
-      setValue("profilePhoto", file);
-    }
+  const imageHandler = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setProfileImagePreview(reader.result);
+      setProfileImage(file);
+      setNewImage(true);
+    };
   };
 
   const onSubmit = async (data) => {
-    setLoading(true);
+    // setLoading(true);
     const formData = new FormData();
     formData.append("name", data.name);
-    formData.append("email", data.email);
+    formData.append("email", user.email);
     formData.append("phone", data.phone);
     formData.append("address", data.address);
-    formData.append("profilePhoto", data.profilePhoto);
+    formData.append("profileImage", profileImage);
+    formData.append("newImage", newImage);
 
-    dispatch(updateUserProfile(formData));
+    await dispatch(updateUserProfile(formData));
+    dispatch(fetchUser());
 
     setLoading(false);
   };
@@ -63,7 +68,10 @@ function EditProfile({ user }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" className="mt-2 bg-primary hover:bg-primary-800 text-white">
+        <Button
+          size="sm"
+          className="mt-2 bg-primary hover:bg-primary-800 text-white"
+        >
           Edit Profile
         </Button>
       </DialogTrigger>
@@ -90,41 +98,19 @@ function EditProfile({ user }) {
                 />
               )}
             />
-            {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+            {errors.name && (
+              <span className="text-red-500 text-sm">
+                {errors.name.message}
+              </span>
+            )}
           </div>
 
-
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label>Email</Label>
-            <Controller
-              name="email"
-              control={control}
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
-                  message: "Invalid email format",
-                },
-              }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  placeholder="Email"
-                  className="col-span-3"
-                  isInvalid={errors.email}
-                />
-              )}
-            />
-            {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
-          </div>
-
-     
           <div className="grid grid-cols-4 items-center gap-4">
             <Label>Phone</Label>
             <Controller
               name="phone"
               control={control}
-              rules={{ required: "Phone number is required" }} 
+              rules={{ required: "Phone number is required" }}
               render={({ field }) => (
                 <Input
                   {...field}
@@ -134,16 +120,19 @@ function EditProfile({ user }) {
                 />
               )}
             />
-            {errors.phone && <span className="text-red-500 text-sm">{errors.phone.message}</span>}
+            {errors.phone && (
+              <span className="text-red-500 text-sm">
+                {errors.phone.message}
+              </span>
+            )}
           </div>
 
-         
           <div className="grid grid-cols-4 items-center gap-4">
             <Label>Address</Label>
             <Controller
               name="address"
               control={control}
-              rules={{ required: "Address is required" }} 
+              rules={{ required: "Address is required" }}
               render={({ field }) => (
                 <Input
                   {...field}
@@ -153,36 +142,39 @@ function EditProfile({ user }) {
                 />
               )}
             />
-            {errors.address && <span className="text-red-500 text-sm">{errors.address.message}</span>}
-          </div>
-
-        
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label>Profile Photo</Label>
-            <Input
-              type="file"
-              accept="image/*"
-              className={filePreview ? "hidden col-span-3" : "col-span-3"}
-              onChange={onChangeHandler}
-              ref={inputRef}
-              required
-            />
-            {filePreview && (
-              <div className="mt-2">
-                <img
-                  src={filePreview}
-                  alt="Profile Preview"
-                  className="w-16 h-16 object-cover rounded-full"
-                  onClick={() => {
-                    inputRef.current.click();
-                  }}
-                />
-              </div>
+            {errors.address && (
+              <span className="text-red-500 text-sm">
+                {errors.address.message}
+              </span>
             )}
           </div>
 
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label>Profile Image</Label>
+            <div className="flex items-center gap-3">
+              <img
+                src={
+                  profileImagePreview ? profileImagePreview : "/imageHolder.jpg"
+                }
+                alt="profileImagePreview"
+                className="w-14 h-14 rounded-full hover:opacity-75 hover:cursor-pointer"
+                onClick={() => imageRef.current.click()}
+              />
+              <Input
+                type="file"
+                onChange={imageHandler}
+                className={profileImage ? "hidden" : "min-w-56"}
+                ref={imageRef}
+              />
+            </div>
+          </div>
+
           <DialogFooter>
-            <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary-800 text-white">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-primary hover:bg-primary-800 text-white"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
