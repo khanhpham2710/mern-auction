@@ -2,7 +2,7 @@ import axios from "axios";
 
 // https://mern-auction-yjtj.onrender.com/auth/login
 const axiosInstance = axios.create({
-  baseURL: "https://mern-auction-yjtj.onrender.com//api/v1",
+  baseURL: "https://mern-auction-yjtj.onrender.com/api/v1",
   // baseURL: "http://localhost:5000/api/v1",
   headers: {
     "Content-Type": "application/json",
