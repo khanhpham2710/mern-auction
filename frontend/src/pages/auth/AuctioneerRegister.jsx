@@ -39,7 +39,7 @@ function AuctioneerRegister() {
   } = useForm();
 
   const [activeTab, setActiveTab] = useState("Step1");
-  const nextRef = useRef()
+  const nextRef = useRef();
 
   const handleRegisterStep1 = async (data) => {
     const formData = {
@@ -58,6 +58,7 @@ function AuctioneerRegister() {
 
   const handleRegisterStep2 = async (data) => {
     const formData = {
+      ...form,
       role: "Auctioneer",
       bankName,
       bankAccountNumber: data.bankAccountNumber,
@@ -65,25 +66,21 @@ function AuctioneerRegister() {
       paypalEmail: data.paypalEmail,
     };
 
-    setForm((prev) => ({
-      ...prev,
-      formData,
-    }));
-
-    const response = await dispatch(register(form));
-    if (response.status === 200) {
-      navigate(`/auth/otp-verification/${data.email}/${data.phone}`);
+    const response = await dispatch(register(formData));
+    if (response.data.success) {
+      navigate(`/auth/otp-verification/${form.email}/${form.phone}`);
     }
   };
 
   return (
     <Tabs value={activeTab} className="w-[400px]">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="Step1" onClick={()=>setActiveTab("Step1")}>Step 1</TabsTrigger>
-        <TabsTrigger
-          value="Step2"
-          onClick={() => nextRef.current.click()}
-        > Step 2
+        <TabsTrigger value="Step1" onClick={() => setActiveTab("Step1")}>
+          Step 1
+        </TabsTrigger>
+        <TabsTrigger value="Step2" onClick={() => nextRef.current.click()}>
+          {" "}
+          Step 2
         </TabsTrigger>
       </TabsList>
 

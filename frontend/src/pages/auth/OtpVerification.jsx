@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { resendOTP, verify } from "@/store/slices/userSlice";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ const OtpVerification = () => {
   const [otp, setOtp] = useState(["", "", "", "", ""]);
   const dispatch = useDispatch();
   const [error, setError] = useState(false);
+  const navigate = useNavigate()
 
   const handleChange = (value, index) => {
     if (!/^\d*$/.test(value)) return;
@@ -46,7 +47,10 @@ const OtpVerification = () => {
         otp: enteredOtp,
         phone,
       };
-      dispatch(verify(data));
+      const response = await dispatch(verify(data));
+      if (response.data.success){
+        navigate("/")
+      }
     }
   };
 

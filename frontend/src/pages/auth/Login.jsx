@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { login } from "@/store/slices/userSlice";
+import { fetchUser, login } from "@/store/slices/userSlice";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { useForm } from "react-hook-form";
@@ -25,11 +25,12 @@ function Login() {
     formState: { errors },
   } = useForm();
 
-  const handleLogin = (data) => {
+  const handleLogin = async (data) => {
     const formData = new FormData();
     formData.append("email", data.email);
     formData.append("password", data.password);
-    dispatch(login(formData));
+    await dispatch(login(formData));
+    dispatch(fetchUser())
   };
 
   return (
