@@ -144,8 +144,8 @@ export const forgotPassword = (email) => async (dispatch) => {
 
 export const resetPassword = (data) => async (dispatch) => {
   try {
-    const response = await axiosInstance.post(
-      `/user/password/reset/${data.token}`,
+    const response = await axiosInstance.put(
+      `/user/reset/${data.token}`,
       data,
       {
         headers: {

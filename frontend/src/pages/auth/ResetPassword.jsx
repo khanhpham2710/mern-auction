@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { useNavigate, useParams } from "react-router-dom";
 
 function ResetPassword() {
   const dispatch = useDispatch();
   const { loading } = useSelector(store => store.user);
+  const { token } = useParams()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -22,10 +25,14 @@ function ResetPassword() {
 
   const handleResetPassword = async (data) => {
     if (data.password === data.confirmPassword) {
-      dispatch(resetPassword({
+      const response = await dispatch(resetPassword({
+        token,
         password: data.password, 
         confirmPassword: data.confirmPassword
       }));
+      if (response.data.success){
+        navigate("/auth/login")
+      }
     }
   };
 

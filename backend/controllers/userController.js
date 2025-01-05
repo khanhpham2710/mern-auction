@@ -455,10 +455,12 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
     .update(token)
     .digest("hex");
 
+
   const user = await User.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
+
 
   if (!user) {
     return next(
@@ -481,5 +483,9 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
 
   await user.save();
 
-  sendToken(user, 200, "Reset Password Successfully.", res);
+  return res.status(200).json({
+    message: "Reset password successfully",
+    success: true,
+    error: false
+  })
 });
