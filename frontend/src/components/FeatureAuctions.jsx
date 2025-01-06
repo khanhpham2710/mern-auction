@@ -10,16 +10,11 @@ const FeaturedAuctions = () => {
         <h3 className="text-[#111] text-xl font-semibold mb-2 min-[480px]:text-xl md:text-2xl lg:text-3xl">
           Featured Auctions
         </h3>
-        <div className="flex flex-wrap gap-6">
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
           {allAuctions?.slice(0, 8).map((element) => {
             return (
               <AuctionCard
-                title={element.title}
-                imgSrc={element.image?.url}
-                startTime={element.startTime}
-                endTime={element.endTime}
-                startingBid={element.startingBid}
-                id={element._id}
+                element={element}
                 key={element._id}
               />
             );

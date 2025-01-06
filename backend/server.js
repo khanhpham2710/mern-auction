@@ -1,5 +1,6 @@
 import app from "./app.js";
 import cloudinary from "cloudinary";
+import swaggerDocs from "./utils/swagger.js";
 
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,4 +11,6 @@ cloudinary.v2.config({
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on port ${process.env.PORT}`);
+
+  swaggerDocs(app, process.env.PORT);
 });

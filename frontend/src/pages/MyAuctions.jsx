@@ -9,7 +9,6 @@ const MyAuctions = () => {
   const { myAuctions, loading } = useSelector((state) => state.auction);
   const { isAuthenticated } = useSelector((state) => state.user);
 
-
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
 
@@ -23,9 +22,7 @@ const MyAuctions = () => {
   return (
     <>
       <div className="w-full ml-0 m-0 h-fit px-5 pt-20 lg:pl-[320px] flex flex-col">
-        <h1
-          className="text-[#d6482b] text-2lg font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-4xl 2xl:text-6xl"
-        >
+        <h1 className="text-[#d6482b] text-2lg font-bold mb-2 min-[480px]:text-4xl md:text-6xl xl:text-4xl 2xl:text-6xl">
           My Auctions
         </h1>
         {loading ? (
@@ -37,18 +34,8 @@ const MyAuctions = () => {
             } flex flex-wrap gap-6`}
           >
             {myAuctions.length > 0 ? (
-              myAuctions.map((element) => {
-                return (
-                  <AuctionCard
-                    title={element.title}
-                    startingBid={element.startingBid}
-                    endTime={element.endTime}
-                    startTime={element.startTime}
-                    imgSrc={element.image?.url}
-                    id={element._id}
-                    key={element._id}
-                  />
-                );
+              myAuctions?.map((element) => {
+                return <AuctionCard element={element} key={element._id} />;
               })
             ) : (
               <h3 className="text-[#666] text-xl font-semibold mb-2 min-[480px]:text-xl lg:text-2xl mt-5">

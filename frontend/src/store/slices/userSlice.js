@@ -108,6 +108,8 @@ export const verify = (data) => async (dispatch) => {
     dispatch(userSlice.actions.verifySuccess(response.data));
     toast.success(response.data.message);
     dispatch(userSlice.actions.clearAllErrors());
+
+    return response;
   } catch (error) {
     dispatch(userSlice.actions.requestFailed());
     toast.error(error.response.data.message);

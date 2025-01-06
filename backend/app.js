@@ -13,6 +13,7 @@ import adminRouter from "./router/adminRoutes.js";
 import { endedAuctionCron } from "./automation/endedAuctionCron.js";
 import { verifyCommissionCron } from "./automation/verifyCommissionCron.js";
 import { removeUnverifiedAccounts } from "./automation/removeUnverifiedAccounts.js";
+import messageRouter from "./router/messageRoutes.js"
 import path from 'path';
 
 const app = express();
@@ -39,22 +40,15 @@ app.use(
 );
 
 
-app.use(
-    cors({
-      origin: [process.env.FRONTEND_URL],
-      methods: ["POST", "GET", "PUT", "DELETE"],
-      credentials: true,
-    })
-  );
-
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/auctionitem", auctionItemRouter);
 app.use("/api/v1/bid", bidRouter);
 app.use("/api/v1/commission", commissionRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/message", messageRouter);
 app.post("/api/v1/health", async (req,res) => {
   return res.status(401).json({
-    message: "Health good",
+    message: "Up",
     error: false,
     success: true,
   });

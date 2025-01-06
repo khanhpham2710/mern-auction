@@ -2,14 +2,33 @@ import { User } from "../models/userSchema.js";
 import jwt from "jsonwebtoken";
 import ErrorHandler from "./error.js";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
+import { refreshAccessToken } from "../utils/jwtToken.js";
 
 export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
   const token =
-    req.cookies.accessToken ||
-    req?.headers?.authorization?.split(" ")[1];
+    req.cookies.accessToken || req?.headers?.authorization?.split(" ")[1];
+
+  const refreshToken = req.cookies.refreshToken;
 
   if (!token) {
-    return next(new ErrorHandler("User not authenticated.", 401));
+    if (!refreshToken)
+      return next(new ErrorHandler("User not authenticated.", 401));
+
+    const verifyToken = await jwt.verify(
+      refreshToken,
+      process.env.REFRESH_JWT_SECRET_KEY
+    );
+
+    if (!verifyToken) {
+      return response.status(401).json({
+        message: "token is expired",
+        error: true,
+        success: false,
+      });
+    }
+
+    const user = await User.findById(verifyToken?.id);
+    refreshAccessToken(user, res);
   }
 
   const decoded = jwt.verify(token, process.env.ACCESS_JWT_SECRET_KEY);

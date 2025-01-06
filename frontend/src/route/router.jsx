@@ -18,6 +18,8 @@ import HowItWorks from "@/pages/HowItWorks";
 import AboutUs from "@/pages/AboutUs";
 import Contact from "@/pages/Contact";
 import Dashboard from "@/pages/Dashboard";
+import ViewAuctionDetails from "@/pages/ViewAuctionDetails";
+import AuctionItem from "@/pages/AuctionItem";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +69,14 @@ const router = createBrowserRouter([
       {
         path: "/dashboard",
         element: <Dashboard />
+      },
+      {
+        path: "/auction/details/:id",
+        element: <ViewAuctionDetails />
+      },
+      {
+        path: "/auction/item/:id",
+        element: <AuctionItem />
       }
     ],
   },

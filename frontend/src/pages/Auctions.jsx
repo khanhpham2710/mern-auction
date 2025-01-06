@@ -1,5 +1,5 @@
 
-import CustomCard from "@/components/CustomCard";
+import AuctionCard from "@/components/AuctionCard";
 import { Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 
@@ -18,15 +18,10 @@ const Auctions = () => {
             >
               Auctions
             </h1>
-            <div className="flex flex-wrap gap-6">
-              {allAuctions.map((element) => (
-                <CustomCard
-                  title={element.title}
-                  startTime={element.startTime}
-                  endTime={element.endTime}
-                  imgSrc={element.image?.url}
-                  startingBid={element.startingBid}
-                  id={element._id}
+            <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 lg:gap-2">
+              {allAuctions?.map((element) => (
+                <AuctionCard
+                  element={element}
                   key={element._id}
                 />
               ))}

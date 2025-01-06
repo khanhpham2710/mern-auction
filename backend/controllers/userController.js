@@ -353,40 +353,31 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const refresh = catchAsyncErrors(async (req, res, next) => {
-  try {
-    const refreshToken =
-      req.cookies.refreshToken || req?.headers?.authorization?.split(" ")[1];
+  const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
-    if (!refreshToken) {
-      return res.status(401).json({
-        message: "Invalid token",
-        error: true,
-        success: false,
-      });
-    }
-
-    const verifyToken = await jwt.verify(
-      refreshToken,
-      process.env.REFRESH_JWT_SECRET_KEY
-    );
-
-    if (!verifyToken) {
-      return response.status(401).json({
-        message: "token is expired",
-        error: true,
-        success: false,
-      });
-    }
-
-    const user = await User.findById(verifyToken?.id);
-    refreshAccessToken(user, res);
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message || error,
+  if (!refreshToken) {
+    return res.status(401).json({
+      message: "Invalid token",
       error: true,
       success: false,
     });
   }
+
+  const verifyToken = await jwt.verify(
+    refreshToken,
+    process.env.REFRESH_JWT_SECRET_KEY
+  );
+
+  if (!verifyToken) {
+    return response.status(401).json({
+      message: "token is expired",
+      error: true,
+      success: false,
+    });
+  }
+
+  const user = await User.findById(verifyToken?.id);
+  refreshAccessToken(user, res);
 });
 
 export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
@@ -413,13 +404,13 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const message = resetPasswordTemplate(user,resetToken)
+  const message = resetPasswordTemplate(user, resetToken);
 
   try {
     sendEmail({
       email: user.email,
       subject: "MERN AUTHENTICATION APP RESET PASSWORD",
-      message
+      message,
     });
     res.status(200).json({
       success: true,
