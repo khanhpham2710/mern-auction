@@ -1,15 +1,13 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
-import packageJson from "../../package.json" assert { type: "json" };
 
-const { version } = packageJson;
 
 const options = {
   definition: {
     openapi: "3.0.0",
     info: {
       title: "REST API Docs",
-      version,
+      version: "1.0.0",
     },
     components: {
       securitySchemes: {

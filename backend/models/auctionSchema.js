@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { deleteImage } from "../utils/cloudinary";
 
 const auctionSchema = new mongoose.Schema({
   title: String,
@@ -48,6 +49,11 @@ const auctionSchema = new mongoose.Schema({
   },
 }, {
     timestamps: true
+});
+
+auctionSchema.pre("delete", async function () {
+  const id = this.image.public_id;
+  await deleteImage(id, "Error delete image on cloudinary")
 });
 
 export const Auction = mongoose.model("Auction", auctionSchema);
