@@ -137,6 +137,9 @@ export const removeFromAuction = catchAsyncErrors(async (req, res, next) => {
   if (!auctionItem) {
     return next(new ErrorHandler("Auction not found.", 404));
   }
+
+  await deleteImage(auctionItem.image.public_id, "Error delete image on cloudinary");
+  
   await auctionItem.deleteOne();
   res.status(200).json({
     success: true,
