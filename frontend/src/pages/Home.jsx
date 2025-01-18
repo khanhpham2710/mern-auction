@@ -72,8 +72,8 @@ const Home = () => {
         </div>
       </div>
       <FeaturedAuctions />
-        <UpcomingAuctions />
-        <Leaderboard />
+      <UpcomingAuctions />
+      <Leaderboard />
     </>
   );
 };

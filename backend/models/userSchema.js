@@ -29,18 +29,28 @@ const userSchema = new mongoose.Schema(
   {
     userName: {
       type: String,
+      required: true,
+      trim: true,
       minLength: [3, "Username must caontain at least 3 characters."],
       maxLength: [40, "Username cannot exceed 40 characters."],
     },
     password: {
       type: String,
+      trim: true,
+      required: true,
       selected: false,
       minLength: [8, "Password must caontain at least 8 characters."],
     },
-    email: String,
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     address: String,
     phone: {
       type: String,
+      unique: true,
       minLength: [11, "Phone Number must caontain exact 11 digits."],
       maxLength: [11, "Phone Number must caontain exact 11 digits."],
     },

@@ -5,9 +5,16 @@ import RepublishAuctionDrawer from "./RepublishAuctionDrawer";
 import DeleteAuctionDrawer from "./DeleteAuctionDrawer";
 import { Card, CardContent } from "./ui/card";
 import useTimeLeft, { formatTimeLeft } from "@/lib/useTimeLeft";
+import { toast } from "react-toastify";
 
 function AuctionCard({ element }) {
-  const { user } = useSelector((store) => store.user);
+  const { user, isAuthenticated } = useSelector((store) => store.user);
+  
+  const handleView = () => {
+    if (!isAuthenticated){
+      toast.warning("Please login");
+    }
+  }
 
   const {
     title,
@@ -60,6 +67,7 @@ function AuctionCard({ element }) {
           <div className="flex flex-col gap-2 mt-4 flex-1 justify-end">
             <Link
               className="bg-stone-700 text-center text-white text-xl px-4 py-2 rounded-md transition-all duration-300 hover:bg-black"
+              onClick={handleView}
               to={
                 createdBy == user._id
                   ? `/auction/details/${id}`
